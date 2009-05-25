@@ -43,8 +43,8 @@
   "Turn this on if you want to use `hippie-expand' for
 completion."
   :type '(choice
-          (const :tag "hippie-expand" nil)
-          (const :tag "dabbrev-expand" t)))
+          (const :tag "hippie-expand" t)
+          (const :tag "dabbrev-expand" nil)))
 
 ;;;###autoload
 (defun smart-tab (prefix)
