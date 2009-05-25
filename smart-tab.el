@@ -83,6 +83,32 @@ Otherwise, analyses point position and answers."
               mark-active)
     (looking-at "\\_>")))
 
+ (defvar smart-tab-map (let ((map (make-sparse-keymap)))
+                         (define-key map [tab] 'smart-tab)
+                         map)
+   "Will only ever contain `smart-tab'.")
+
+(defun smart-tab-mode-on ()
+  (smart-tab-mode 1))
+
+(define-minor-mode smart-tab-mode
+  smart-tab-mode
+  smart-tab-mode-on
+  "Activate smart-tab.
+With no argument, this command toggles the mode.
+Non-null prefix argument turns on the mode.
+Null prefix argument turns off the mode."
+  :init-value nil
+  :lighter " Smrt"
+  :global t
+  :keymap smart-tab-map
+;  :keymap  '(([tab] . smart-tab))
+  )
+
+(define-globalized-minor-mode global-smart-tab-mode
+  smart-tab-mode
+  smart-tab-mode-on)
+
 (provide 'smart-tab)
 
 ;;; smart-tab.el ends here
