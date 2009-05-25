@@ -1,30 +1,34 @@
-;;; smart-tab.el --- Intelligently expand or indent for tab.
+;;; smart-tab.el --- Intelligent tab completion and indentation.
 
-;; Copyright (C) 2008 Sebastien Rocca Serra
+;; Copyright (C) 2009 Sebastien Rocca Serra,
+;;                    Daniel Hackney
 
-;; Description: Intelligently expand or indent for tab.
 ;; Author: Sebastien Rocca Serra <sroccaserra@gmail.com>
+;;         Daniel Hackney <dan@haxney.org>
 ;; Maintainer: Daniel Hackney <dan@haxney.org>
 ;; Keywords: convenience abbrev
-;; Homepage: http://www.emacswiki.org/emacs/TabCompletion
-;; Version: 0.1
+;; Created: 24 May 2009
+;; URL: http://github.com/chrono325/smart-tab/tree/master
+;; Version: 0.2
+;; Features that might be required by this library:
+;; 
+;;   `easy-mmmode'
+
 
 ;; This file is NOT part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; This program is free software; you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation; either version 3, or (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; This program is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+;; details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
+;; You should have received a copy of the GNU General Public License along with
+;; this program; see the file COPYING.  If not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 ;;; Commentary:
 ;;
@@ -33,18 +37,22 @@
 ;;
 ;; To activate, add:
 ;;     (require 'smart-tab)
-;;     (global-set-key [(tab)] 'smart-tab)
+;;     (global-smart-tab-mode 1)
 ;;
-;; to your .emacs file.
+;; to your .emacs file, or set `global-smart-tab-mode' to non-nil with
+;; customize.
 
 ;;; Code:
+
+(require 'easy-mmode)
 
 (defgroup smart-tab nil
   "Options for `smart-tab-mode'.")
 
 (defcustom smart-tab-using-hippie-expand nil
-  "Turn this on if you want to use `hippie-expand' for
-completion."
+  "Use `hippie-expand' to expand text.
+Use either `hippie-expand' or `dabbrev-expand' for expanding text
+when we don't have to indent."
   :type '(choice
           (const :tag "hippie-expand" t)
           (const :tag "dabbrev-expand" nil))
@@ -52,12 +60,22 @@ completion."
 
 ;;;###autoload
 (defun smart-tab (prefix)
-  "Needs `transient-mark-mode' to be on. This smart tab is
-minibuffer compliant: it acts as usual in the minibuffer.
+  "Try to 'do the right thing' when tab is pressed.
+`smart-tab' attempts to expand the text before the point, indent
+the current line or selection, or complete a string (when in the
+minibuffer). 
 
-In all other buffers: if PREFIX is \\[universal-argument], calls
-`smart-indent'. Else if point is at the end of a symbol,
-expands it. Else calls `smart-indent'."
+If tab is pressed while in the minibuffer, then
+`minibuffer-complete' is called, unless an `ido-completing-read'
+is in progress, in which case `ido-complete' is called. This lets
+`smart-tab' work correctly both when completing with ido and when
+using the default completion.
+
+In a regular buffer, `smart-tab' will attempt to expand with
+either `hippie-expand' or `dabbrev-expand', depending on the
+value of `smart-tab-using-hippie-expand'. If the mark is active,
+or PREFIX is \\[universal-argument], then `smart-tab' will indent
+the region or the current line (if the mark is not active)."
   (interactive "P")
   (if (minibufferp)
       ;; If completing with ido, need to use `ido-complete' to continue
@@ -81,21 +99,20 @@ expands it. Else calls `smart-indent'."
     (indent-for-tab-command)))
 
 (defun smart-tab-must-expand (&optional prefix)
-  "If PREFIX is \\[universal-argument], answers no.
-Otherwise, analyses point position and answers."
+  "If PREFIX is \\[universal-argument] or the mark is active, do not expand.
+Otherwise, uses `hippie-expand' or `dabbrev-expand' to expand the text at point.."
   (unless (or (consp prefix)
               mark-active)
     (looking-at "\\_>")))
 
 ;;;###autoload
 (defun smart-tab-mode-on ()
-  "Turn on `smart-tab-mode'"
+  "Turn on `smart-tab-mode'."
   (unless (minibufferp)
     (smart-tab-mode 1)))
 
 ;;;###autoload
 (define-minor-mode smart-tab-mode
-  smart-tab-mode
   "Enable `smart-tab' to be used in place of tab.
 
 All this does is set up the keybinding of [tab] to `smart-tab'.
@@ -105,7 +122,8 @@ Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode."
   :lighter " Smrt"
   :keymap  '(([tab] . smart-tab))
-  :group 'smart-tab)
+  :group 'smart-tab
+  :require 'smart-tab)
 
 ;;;###autoload
 (define-globalized-minor-mode global-smart-tab-mode
