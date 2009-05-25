@@ -56,7 +56,12 @@ In all other buffers: if PREFIX is \\[universal-argument], calls
 expands it. Else calls `smart-indent'."
   (interactive "P")
   (if (minibufferp)
-      (minibuffer-complete)
+      ;; If completing with ido, need to use `ido-complete' to continue
+      ;; completing, not `minibuffer-complete'
+      (if (and (functionp 'ido-active)
+               (ido-active))
+          (ido-complete)
+        (minibuffer-complete))
     (if (smart-tab-must-expand prefix)
         (if smart-tab-using-hippie-expand
             (hippie-expand nil)
