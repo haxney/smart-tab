@@ -39,12 +39,16 @@
 
 ;;; Code:
 
+(defgroup smart-tab nil
+  "Options for `smart-tab-mode'.")
+
 (defcustom smart-tab-using-hippie-expand nil
   "Turn this on if you want to use `hippie-expand' for
 completion."
   :type '(choice
           (const :tag "hippie-expand" t)
-          (const :tag "dabbrev-expand" nil)))
+          (const :tag "dabbrev-expand" nil))
+  :group 'smart-tab)
 
 ;;;###autoload
 (defun smart-tab (prefix)
@@ -83,31 +87,31 @@ Otherwise, analyses point position and answers."
               mark-active)
     (looking-at "\\_>")))
 
- (defvar smart-tab-map (let ((map (make-sparse-keymap)))
-                         (define-key map [tab] 'smart-tab)
-                         map)
-   "Will only ever contain `smart-tab'.")
-
+;;;###autoload
 (defun smart-tab-mode-on ()
-  (smart-tab-mode 1))
+  "Turn on `smart-tab-mode'"
+  (unless (minibufferp)
+    (smart-tab-mode 1)))
 
+;;;###autoload
 (define-minor-mode smart-tab-mode
   smart-tab-mode
-  smart-tab-mode-on
-  "Activate smart-tab.
+  "Enable `smart-tab' to be used in place of tab.
+
+All this does is set up the keybinding of [tab] to `smart-tab'.
+
 With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode."
-  :init-value nil
   :lighter " Smrt"
-  :global t
-  :keymap smart-tab-map
-;  :keymap  '(([tab] . smart-tab))
-  )
+  :keymap  '(([tab] . smart-tab))
+  :group 'smart-tab)
 
+;;;###autoload
 (define-globalized-minor-mode global-smart-tab-mode
   smart-tab-mode
-  smart-tab-mode-on)
+  smart-tab-mode-on
+  :group 'smart-tab)
 
 (provide 'smart-tab)
 
