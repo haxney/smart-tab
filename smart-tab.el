@@ -9,7 +9,7 @@
 ;; Keywords: convenience abbrev
 ;; Created: 24 May 2009
 ;; URL: http://github.com/chrono325/smart-tab/tree/master
-;; Version: 0.2
+;; Version: 0.3
 ;; Features that might be required by this library:
 ;;
 ;;   `easy-mmmode'
