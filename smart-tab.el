@@ -96,15 +96,9 @@ Otherwise, uses `hippie-expand' or `dabbrev-expand' to expand the text at point.
   "Turn on `smart-tab-mode'."
     (smart-tab-mode 1))
 
-;; Save the old definition of tab.
-(defvar smart-tab-previous-tab-binding (global-key-binding "\t"))
-(make-variable-buffer-local 'smart-tab-previous-tab-binding)
-
 ;;;###autoload
 (define-minor-mode smart-tab-mode
   "Enable `smart-tab' to be used in place of tab.
-
-All this does is set up the keybinding of [tab] to `smart-tab'.
 
 With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
@@ -112,21 +106,15 @@ Null prefix argument turns off the mode."
   :lighter " Smrt"
   :group 'smart-tab
   :require 'smart-tab
-  (let ((prev-bind (global-key-binding "\t")))
-    (if smart-tab-mode
-        (progn
-          (unless (eq prev-bind 'smart-tab)
-            (setq smart-tab-previous-tab-binding prev-bind))
-
-          ;; Don't start `smart-tab-mode' when in the minibuffer or a read-only
-          ;; buffer.
-          (when (or (minibufferp)
-                    buffer-read-only)
-            (smart-tab-mode -1))
-          (global-set-key "\t" 'smart-tab))
-
-      ;; Restore the old binding of tab.
-      (global-set-key "\t" smart-tab-previous-tab-binding))))
+  :keymap '(("\t" . smart-tab)
+            ([(tab)] . smart-tab))
+  (if smart-tab-mode
+      (progn
+        ;; Don't start `smart-tab-mode' when in the minibuffer or a read-only
+        ;; buffer.
+        (when (or (minibufferp)
+                  buffer-read-only)
+          (smart-tab-mode -1)))))
 
 ;;;###autoload
 (define-globalized-minor-mode global-smart-tab-mode
