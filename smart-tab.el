@@ -105,6 +105,10 @@ Otherwise, uses `hippie-expand' or `dabbrev-expand' to expand the text at point.
   "Turn on `smart-tab-mode'."
     (smart-tab-mode 1))
 
+(defun smart-tab-mode-off ()
+  "Turn off `smart-tab-mode'."
+  (smart-tab-mode -1))
+
 ;;;###autoload
 (define-minor-mode smart-tab-mode
   "Enable `smart-tab' to be used in place of tab.
@@ -123,7 +127,7 @@ Null prefix argument turns off the mode."
         ;; buffer.
         (when (or (minibufferp)
                   buffer-read-only)
-          (smart-tab-mode -1)))))
+          (smart-tab-mode-off)))))
 
 ;;;###autoload
 (define-globalized-minor-mode global-smart-tab-mode
